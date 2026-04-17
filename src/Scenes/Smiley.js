@@ -1,3 +1,9 @@
+//const { Phaser } = require("../../lib/phaser");
+
+/// DONOVAN BURROLA dburrola@ucsc.edu
+
+
+
 class Smiley extends Phaser.Scene {
     constructor() {
         super("smileyScene");
@@ -20,6 +26,22 @@ class Smiley extends Phaser.Scene {
         
         this.counter = 0;
         this.smileType = 'Smile';
+
+
+
+        //// POLLING INPUT! PEACE SIGN! USE 'P' key
+
+        this.peaceInput = null;
+
+        // DIMPLE INPUT! USE 'D' key!
+
+        this.dimpleInput = null;
+
+        // SMILE INPUT! USE 'S' key!
+       
+        this.smileInput = null;
+        this.counterLock = false;
+
     }
 
     // Use preload to load art and sound assets before the scene starts running.
@@ -34,6 +56,9 @@ class Smiley extends Phaser.Scene {
         this.load.image("smileDimple", "face_c.png");
         // hands
         this.load.image("handOpen", "hand_yellow_open.png");
+
+        this.load.image("handPeace", "hand_yellow_peace.png");
+
 
         // update instruction text
         document.getElementById('description').innerHTML = '<h2>Smiley.js</h2>'
@@ -54,9 +79,37 @@ class Smiley extends Phaser.Scene {
         my.sprite.leftOpenHand.flipX = true;   // flip sprite to have thumb on correct side
         my.sprite.rightOpenHand = this.add.sprite(this.rightHandX, this.rightHandY, "handOpen");
 
+//// Lets make hands for just the peace sign
+
+        my.sprite.leftPeaceHand = this.add.sprite(this.leftHandX, this.lefthandY, "handPeace");
+        my.sprite.leftPeaceHand.flipX = true;   // flip sprite to have thumb on correct side
+        my.sprite.rightPeaceHand = this.add.sprite(this.rightHandX, this.rightHandY, "handPeace");
+
         // Since sprites are visible when created and we only want one smile to be shown
         // at a time, make the "dimple" smile not visible to start.
         my.sprite.dimple.visible = false;
+
+
+        //// POLLING INPUT! PEACE SIGN! USE 'P' key
+
+        this.peaceInput = this.input.keyboard.addKey('P');
+
+        
+        this.input.keyboard.on('keydown', (event) => {
+            console.log("A key was pressed.");
+            if (event.keyCode === Phaser.Input.Keyboard.KeyCodes.D) {
+                    this.smileType = "Dimple";
+                    my.sprite.smile.visible = false;
+                    my.sprite.dimple.visible = true;
+            } else if(event.keyCode === Phaser.Input.Keyboard.KeyCodes.S){
+                    this.counterLock = true;
+                    this.smileType = "Smile";
+                    my.sprite.dimple.visible = false;
+                    my.sprite.smile.visible = true;
+            }
+        });
+        
+
     }
 
     update() {
@@ -65,24 +118,71 @@ class Smiley extends Phaser.Scene {
         // a timer, increasing once per clock tick
         this.counter++;
 
+
+
+
+
         if (this.counter % 120 == 0) {  // Do this once every 120 calls to update()
             switch (this.smileType) {
                 case "Smile":
                     // Currently a regular smile, so change to dimple smile
-                    this.smileType = "Dimple";
-                    my.sprite.smile.visible = false;
-                    my.sprite.dimple.visible = true;
+                    if(!this.counterLock){
+                        this.smileType = "Dimple";
+                        my.sprite.smile.visible = false;
+                        my.sprite.dimple.visible = true;
+                    }
+                    my.sprite.leftPeaceHand.visible = true;
+                    my.sprite.rightPeaceHand.visible = true;
+                    
+                    my.sprite.leftOpenHand.visible = false;
+                    my.sprite.rightOpenHand.visible = false;
+                    
                     break;
                 case "Dimple":
                     // Currently a dimple smile, so change to regular smile
-                    this.smileType = "Smile";
-                    my.sprite.dimple.visible = false;
-                    my.sprite.smile.visible = true;
+                    if(!this.counterLock){
+                        this.smileType = "Smile";
+                        my.sprite.dimple.visible = false;
+                        my.sprite.smile.visible = true;
+                    }
+
+                    my.sprite.leftPeaceHand.visible = false;
+                    my.sprite.rightPeaceHand.visible = false;
+                    
+                    my.sprite.leftOpenHand.visible = true;
+                    my.sprite.rightOpenHand.visible = true;
+
+
                     break;
                 default:
                     console.log("Error: unknown smile");
             }
         }
+
+
+
+        //// POLLING INPUT! PEACE SIGN! USE 'P' key
+
+        if(this.peaceInput.isDown){
+            //console.log("Help");
+
+                    my.sprite.leftPeaceHand.visible = true;
+                    my.sprite.rightPeaceHand.visible = true;
+                    
+                    my.sprite.leftOpenHand.visible = false;
+                    my.sprite.rightOpenHand.visible = false;
+        } else if(Phaser.Input.Keyboard.JustUp(this.peaceInput)){
+                    my.sprite.leftPeaceHand.visible = false;
+                    my.sprite.rightPeaceHand.visible = false;
+                    
+                    my.sprite.leftOpenHand.visible = true;
+                    my.sprite.rightOpenHand.visible = true;
+        }
+
+
+
+    
+
     }
 
 }
